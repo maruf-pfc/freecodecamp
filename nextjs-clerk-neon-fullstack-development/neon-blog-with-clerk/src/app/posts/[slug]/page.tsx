@@ -10,43 +10,53 @@ import { useUser } from "@clerk/nextjs";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
 import { User, Calendar, Trash2, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 
-//================================//
-//   1. Skeleton Loading State    //
-//================================//
+//=========================//
+// Skeleton Loading State  //
+//=========================//
 function PostSkeleton() {
   return (
     <div className="max-w-4xl mx-auto animate-pulse">
-      <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-4"></div>
-      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2 mb-12"></div>
+      <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-4" />
+      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2 mb-12" />
       <div className="space-y-6">
         <div className="space-y-3">
-          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full"></div>
-          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-5/6"></div>
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full" />
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-5/6" />
         </div>
         <div className="space-y-3">
-          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full"></div>
-          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full"></div>
-          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4"></div>
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full" />
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full" />
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4" />
         </div>
       </div>
     </div>
   );
 }
 
-//================================//
-//     2. Code Block Component    //
-//================================//
-type CodeBlockProps = {
-  node?: any;
+//=========================//
+// Code Block Component    //
+//=========================//
+function CodeBlock({
+  inline,
+  className,
+  children,
+  ...props
+}: {
   inline?: boolean;
   className?: string;
   children?: React.ReactNode;
-};
-
-function CodeBlock({ inline, className, children, ...props }: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
+}) {
   const codeRef = useRef<HTMLElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  // Highlight code whenever children or className changes
+  useEffect(() => {
+    if (codeRef.current && !inline) {
+      hljs.highlightElement(codeRef.current);
+    }
+  }, [children, inline]);
 
   const handleCopy = () => {
     if (codeRef.current?.textContent) {
@@ -55,12 +65,6 @@ function CodeBlock({ inline, className, children, ...props }: CodeBlockProps) {
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  useEffect(() => {
-    if (codeRef.current) {
-      hljs.highlightElement(codeRef.current);
-    }
-  }, [children]);
 
   if (!inline) {
     const languageMatch = /language-(\w+)/.exec(className || "");
@@ -93,7 +97,7 @@ function CodeBlock({ inline, className, children, ...props }: CodeBlockProps) {
 
   return (
     <code
-      className="bg-slate-200 dark:bg-slate-700/50 rounded-md px-1.5 py-1 text-sm font-mono text-sky-600 dark:text-sky-400"
+      className="bg-slate-200 dark:bg-slate-700/50 rounded-md px-1.5 py-1 text-sm font-mono"
       {...props}
     >
       {children}
@@ -101,9 +105,9 @@ function CodeBlock({ inline, className, children, ...props }: CodeBlockProps) {
   );
 }
 
-//================================//
-//      3. Main Post Page         //
-//================================//
+//=========================//
+// Main Post Page          //
+//=========================//
 export default function Post() {
   const router = useRouter();
   const { isLoaded, user } = useUser();
@@ -112,16 +116,21 @@ export default function Post() {
   const params = useParams<{ slug: string }>();
 
   const fetchPostDetails = useCallback(async () => {
+    if (!params.slug) return;
+
+    setLoading(true);
     try {
       const res = await fetch("/api/posts/single", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug: params.slug }),
       });
+      if (!res.ok) throw new Error("Failed to fetch post");
       const { data } = await res.json();
-      if (data) setPost(data);
+      setPost(data);
     } catch (err) {
       console.error(err);
+      setPost(null);
     } finally {
       setLoading(false);
     }
@@ -138,14 +147,19 @@ export default function Post() {
         "Are you sure you want to delete this post? This action cannot be undone."
       )
     ) {
-      const res = await fetch("/api/posts/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: post.id }),
-      });
-      const { message } = await res.json();
-      alert(message);
-      router.push("/");
+      try {
+        const res = await fetch("/api/posts/delete", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: post.id }),
+        });
+        const { message } = await res.json();
+        toast.success(message);
+        router.push("/");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to delete post.");
+      }
     }
   };
 
@@ -157,25 +171,35 @@ export default function Post() {
     );
   }
 
+  if (!post) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-3xl font-bold">Post not found</h2>
+        <p className="text-slate-500 mt-4">
+          Sorry, we couldn&apos;t find the post you&apos;re looking for.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <article className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:py-12">
-      {/* Post Header */}
       <header className="mb-10 border-b pb-8 border-slate-200 dark:border-slate-800">
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-tight mb-6">
-          {post?.title}
+          {post.title}
         </h1>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-y-4">
           <div className="flex items-center gap-x-6 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
               <User size={16} />
-              <span className="font-medium">{post?.author}</span>
+              <span className="font-medium">{post.author}</span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar size={16} />
-              <span>{formatDateString(post?.created_at!)}</span>
+              <span>{formatDateString(post.created_at)}</span>
             </div>
           </div>
-          {user?.id === post?.author_id && (
+          {user?.id === post.author_id && (
             <button
               onClick={deletePost}
               className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-500/10 rounded-md transition-colors self-start"
@@ -187,20 +211,12 @@ export default function Post() {
         </div>
       </header>
 
-      <div
-        className="
-  prose prose-slate dark:prose-invert 
-  lg:prose-lg max-w-none
-  prose-p:leading-relaxed
-  prose-headings:mt-12 prose-headings:mb-4 prose-headings:font-bold prose-headings:tracking-tight
-  prose-table:mt-6
-"
-      >
+      <div className="prose prose-slate dark:prose-invert lg:prose-lg max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{ code: CodeBlock }}
         >
-          {post?.content!}
+          {post.content}
         </ReactMarkdown>
       </div>
     </article>

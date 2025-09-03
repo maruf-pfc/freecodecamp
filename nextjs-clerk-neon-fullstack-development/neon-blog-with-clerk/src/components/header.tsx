@@ -4,6 +4,7 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, Feather } from "lucide-react"; // Awesome icons!
+import { ModeToggle } from "./ModeToggle";
 
 // A reusable link component for consistency
 const NavLink = ({
@@ -40,6 +41,7 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-6">
             <SignedIn>
               <NavLink href="/posts/create">Create Post</NavLink>
+              <ModeToggle />
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{

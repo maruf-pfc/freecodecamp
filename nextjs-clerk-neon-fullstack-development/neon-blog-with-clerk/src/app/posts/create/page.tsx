@@ -1,20 +1,24 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import SimpleMDE from "react-simplemde-editor";
-import "easymde/dist/easymde.min.css";
-import { slugifySentences } from "@/utils";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { slugifySentences } from "@/utils";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+
+// Dynamically import MDEditor to prevent SSR issues
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 export default function PostCreate() {
   const { isLoaded, user } = useUser();
-  const [publishing, setPublishing] = useState(false);
-  const [content, setContent] = useState("");
-  const [title, setTitle] = useState("");
   const router = useRouter();
 
-  const onChangeContent = useCallback((value: string) => setContent(value), []);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [publishing, setPublishing] = useState(false);
 
   if (!isLoaded) return <p className="text-center py-10">Loading...</p>;
 
@@ -24,8 +28,9 @@ export default function PostCreate() {
 
     const trimmedTitle = title.trim();
     const trimmedContent = content.trim();
+
     if (!trimmedTitle || !trimmedContent) {
-      alert("Title and content cannot be empty");
+      toast("Title and content cannot be empty");
       return;
     }
 
@@ -46,81 +51,60 @@ export default function PostCreate() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error creating post");
+      if (!res.ok) throw new Error(data.message || "Failed to create post");
 
-      alert(data.message);
-      router.push("/");
-    } catch (err: any) {
-      console.error("Create post error:", err);
-      alert(err.message || "Failed to create post");
+      toast.success(data.message);
+      router.push(`/posts/${slug}`);
+    } catch (err: unknown) {
+      console.error(err);
+      if (err instanceof Error) toast.error(err.message);
+      else toast.error("Failed to create post");
     } finally {
       setPublishing(false);
     }
   };
 
   return (
-    <div className="min-h-screen py-12">
+    <div className="min-h-screen py-12 bg-slate-50 dark:bg-slate-900">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-center text-blue-700 dark:text-blue-400 mb-10">
           Create a New Post
         </h1>
 
         <form
-          className="flex flex-col w-full bg-white p-8 rounded-lg shadow-md border border-gray-200"
           onSubmit={handleCreatePost}
+          className="flex flex-col w-full bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-slate-700"
         >
           {/* Title */}
           <label
             htmlFor="title"
-            className="text-sm font-medium text-gray-700 mb-2"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Post Title
           </label>
           <input
-            type="text"
             id="title"
+            type="text"
             value={title}
-            required
             onChange={(e) => setTitle(e.target.value)}
-            className="mb-6 px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             placeholder="Enter your post title..."
+            className="mb-6 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-slate-100 transition"
           />
 
           {/* Content */}
           <label
             htmlFor="content"
-            className="text-sm font-medium text-gray-700 mb-2"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Content
           </label>
-          <div className="mb-6 border border-gray-300 rounded-lg overflow-hidden">
-            <SimpleMDE
+          <div className="mb-6">
+            <MDEditor
               value={content}
-              onChange={onChangeContent}
-              options={{
-                spellChecker: false,
-                placeholder: "Write your post here...",
-                status: false,
-                toolbar: [
-                  "bold",
-                  "italic",
-                  "heading",
-                  "|",
-                  "quote",
-                  "unordered-list",
-                  "ordered-list",
-                  "|",
-                  "code",
-                  "link",
-                  "image",
-                  "|",
-                  "preview",
-                  "side-by-side",
-                  "fullscreen",
-                ],
-                minHeight: "300px",
-              }}
-              id="content"
+              onChange={(value) => setContent(value || "")} // ✅ fixed typing issue
+              height={300}
+              preview="edit"
+              className="bg-white dark:bg-slate-800 rounded-lg"
             />
           </div>
 
@@ -128,7 +112,7 @@ export default function PostCreate() {
           <button
             type="submit"
             disabled={publishing}
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             {publishing ? "Publishing... please wait" : "Publish Post"}
           </button>
