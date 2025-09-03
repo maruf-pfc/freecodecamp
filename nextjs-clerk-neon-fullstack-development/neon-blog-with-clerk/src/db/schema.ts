@@ -6,6 +6,6 @@ export const postsTable = pgTable("posts", {
   content: text("content").notNull(),
   author: text("author").notNull(),
   author_id: text("author_id").notNull(),
-  slug: text("slug").notNull(),
+  slug: text("slug").notNull().unique(),
   created_at: timestamp("created_at").defaultNow(),
 });

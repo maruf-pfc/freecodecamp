@@ -2,71 +2,207 @@
 
 import { useRouter, useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import remarkGfm from "remark-gfm";
 import { formatDateString } from "@/utils";
 import type { Post } from "@/types/Post";
-import { dummyPosts } from "@/db/dummy";
+import { useUser } from "@clerk/nextjs";
+import hljs from "highlight.js";
+import "highlight.js/styles/github-dark.css";
+import { User, Calendar, Trash2, Copy, Check } from "lucide-react";
 
-export default function PostPage() {
-  const router = useRouter();
-  const params = useParams<{ slug: string }>();
-  const [post, setPost] = useState<Post | null>(null);
+//================================//
+//   1. Skeleton Loading State    //
+//================================//
+function PostSkeleton() {
+  return (
+    <div className="max-w-4xl mx-auto animate-pulse">
+      <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-4"></div>
+      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2 mb-12"></div>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full"></div>
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-5/6"></div>
+        </div>
+        <div className="space-y-3">
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full"></div>
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-full"></div>
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  // Fetch the post when the slug changes
-  useEffect(() => {
-    if (params?.slug) {
-      const foundPost = dummyPosts.find((p) => p.slug === params.slug);
-      setPost(foundPost ?? null);
+//================================//
+//     2. Code Block Component    //
+//================================//
+type CodeBlockProps = {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+function CodeBlock({ inline, className, children, ...props }: CodeBlockProps) {
+  const [copied, setCopied] = useState(false);
+  const codeRef = useRef<HTMLElement>(null);
+
+  const handleCopy = () => {
+    if (codeRef.current?.textContent) {
+      navigator.clipboard.writeText(codeRef.current.textContent);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
-  }, [params?.slug]);
+  };
 
-  const deletePost = () => {
-    if (confirm("Are you sure you want to delete this post?")) {
-      alert(`Deleted post: ${params.slug}`);
+  useEffect(() => {
+    if (codeRef.current) {
+      hljs.highlightElement(codeRef.current);
+    }
+  }, [children]);
+
+  if (!inline) {
+    const languageMatch = /language-(\w+)/.exec(className || "");
+    const language = languageMatch ? languageMatch[1] : "text";
+
+    return (
+      <div className="my-6 rounded-xl border dark:border-slate-800 bg-slate-900/70 text-sm">
+        <div className="flex items-center justify-between px-4 py-2 border-b dark:border-slate-800">
+          <span className="text-xs font-mono text-slate-400">{language}</span>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+          >
+            {copied ? (
+              <Check size={14} className="text-emerald-400" />
+            ) : (
+              <Copy size={14} />
+            )}
+            {copied ? "Copied!" : "Copy code"}
+          </button>
+        </div>
+        <pre className="p-4 overflow-x-auto">
+          <code ref={codeRef} {...props} className={`hljs ${className}`}>
+            {children}
+          </code>
+        </pre>
+      </div>
+    );
+  }
+
+  return (
+    <code
+      className="bg-slate-200 dark:bg-slate-700/50 rounded-md px-1.5 py-1 text-sm font-mono text-sky-600 dark:text-sky-400"
+      {...props}
+    >
+      {children}
+    </code>
+  );
+}
+
+//================================//
+//      3. Main Post Page         //
+//================================//
+export default function Post() {
+  const router = useRouter();
+  const { isLoaded, user } = useUser();
+  const [loading, setLoading] = useState(true);
+  const [post, setPost] = useState<Post | null>(null);
+  const params = useParams<{ slug: string }>();
+
+  const fetchPostDetails = useCallback(async () => {
+    try {
+      const res = await fetch("/api/posts/single", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: params.slug }),
+      });
+      const { data } = await res.json();
+      if (data) setPost(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [params.slug]);
+
+  useEffect(() => {
+    fetchPostDetails();
+  }, [fetchPostDetails]);
+
+  const deletePost = async () => {
+    if (!post) return;
+    if (
+      confirm(
+        "Are you sure you want to delete this post? This action cannot be undone."
+      )
+    ) {
+      const res = await fetch("/api/posts/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: post.id }),
+      });
+      const { message } = await res.json();
+      alert(message);
       router.push("/");
     }
   };
 
-  if (!post) {
-    return <p className="p-4 text-red-500">Post not found</p>;
+  if (loading || !isLoaded) {
+    return (
+      <div className="px-4 py-8 sm:px-6 lg:py-12">
+        <PostSkeleton />
+      </div>
+    );
   }
 
   return (
-    <div>
-      <main className="w-full md:px-8 px-4">
-        <header className="mb-6 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-3xl text-blue-700 font-bold">{post.title}</h2>
-            <div className="flex items-center">
-              <button
-                className="px-4 py-2 rounded text-xs bg-red-200 hover:bg-red-400 mr-3"
-                onClick={deletePost}
-              >
-                Delete
-              </button>
+    <article className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:py-12">
+      {/* Post Header */}
+      <header className="mb-10 border-b pb-8 border-slate-200 dark:border-slate-800">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-tight mb-6">
+          {post?.title}
+        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-y-4">
+          <div className="flex items-center gap-x-6 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <User size={16} />
+              <span className="font-medium">{post?.author}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={16} />
+              <span>{formatDateString(post?.created_at!)}</span>
             </div>
           </div>
-
-          <div className="flex">
-            <p className="text-red-500 mr-8 text-sm">
-              Author: <span className="text-gray-700">{post.author}</span>
-            </p>
-            <p className="text-red-500 mr-6 text-sm">
-              Posted on:{" "}
-              <span className="text-gray-700">
-                {formatDateString(post.created_at)}
-              </span>
-            </p>
-          </div>
-        </header>
-
-        <div className="text-sm text-justify">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {post.content}
-          </ReactMarkdown>
+          {user?.id === post?.author_id && (
+            <button
+              onClick={deletePost}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-red-600 dark:text-red-500 hover:bg-red-500/10 rounded-md transition-colors self-start"
+            >
+              <Trash2 size={14} />
+              Delete Post
+            </button>
+          )}
         </div>
-      </main>
-    </div>
+      </header>
+
+      <div
+        className="
+  prose prose-slate dark:prose-invert 
+  lg:prose-lg max-w-none
+  prose-p:leading-relaxed
+  prose-headings:mt-12 prose-headings:mb-4 prose-headings:font-bold prose-headings:tracking-tight
+  prose-table:mt-6
+"
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{ code: CodeBlock }}
+        >
+          {post?.content!}
+        </ReactMarkdown>
+      </div>
+    </article>
   );
 }

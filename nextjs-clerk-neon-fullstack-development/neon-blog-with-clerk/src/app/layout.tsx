@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import Link from "next/link";
+import { ClerkProvider } from "@clerk/nextjs";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,31 +27,19 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200`}
         >
-          <nav className="w-full py-4 border-b-[1px] md:px-8 px-4 text-center flex items-center justify-between sticky top-0 bg-white z-10 ">
-            <Link href="/" className="text-xl font-extrabold text-blue-700">
-              Neon Blog
-            </Link>
-
-            <div className="flex items-center gap-5">
-              {/*-- if user is signed out --*/}
-              <SignedOut>
-                <SignInButton mode="modal" />
-              </SignedOut>
-              {/*-- if user is signed in --*/}
-              <SignedIn>
-                <Link href="/posts/create" className="">
-                  Create Post
-                </Link>
-                <UserButton showName />
-              </SignedIn>
-            </div>
-          </nav>
-
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            {/* --- THIS IS THE UPDATED LINE --- */}
+            <main className="flex-grow container py-8 w-full mx-auto">
+              {children}
+            </main>
+            {/* --------------------------------- */}
+            <Footer />
+          </div>
         </body>
       </html>
     </ClerkProvider>
