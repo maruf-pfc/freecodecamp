@@ -13,7 +13,7 @@ My notes on [https://www.freecodecamp.org/news](https://www.freecodecamp.org/new
 - [ ] [LeetCode Meditations: A Visual Handbook of Data Structures and Algorithms Concepts](https://www.freecodecamp.org/news/leetcode-dsa-concepts-handbook)
 - [ ] [How Attackers Target Travelers – and How to Defend Yourself](https://www.freecodecamp.org/news/how-attackers-target-travelers-and-how-to-defend-yourself)
 - [ ] [Master REST API Development with .NET 9](https://www.freecodecamp.org/news/master-rest-api-development-with-net-9)
-- [ ] [A Beginner Developer's Guide to Kanban](https://www.freecodecamp.org/news/a-beginner-developers-guide-to-kanban)
+- [x] [A Beginner Developer's Guide to Kanban](https://www.freecodecamp.org/news/a-beginner-developers-guide-to-kanban)
 - [ ] [A Beginner Developer's Guide to Scrum](https://www.freecodecamp.org/news/a-beginner-developers-guide-to-scrum)
 - [ ] [Learn Interactive Data Visualization with Svelte and D3](https://www.freecodecamp.org/news/learn-interactive-data-visualization-with-svelte-and-d3)
 - [ ] [Top Application Monitoring Tools for Developers](https://www.freecodecamp.org/news/top-application-monitoring-tools-for-developers)
