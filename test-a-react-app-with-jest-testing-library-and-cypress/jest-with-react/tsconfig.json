@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
+    // 👇 Enable JSX for .tsx files
+    "jsx": "react-jsx",
+
+    // For Jest + testing-library types
+    "types": ["jest", "@testing-library/jest-dom"]
+  },
+  "include": ["src"]
+}
