@@ -9,7 +9,7 @@ My notes on [https://www.freecodecamp.org/news](https://www.freecodecamp.org/new
 - [ ] [How to Get Started with ASP.NET Core and gRPC](https://www.freecodecamp.org/news/get-started-with-aspnet-core-and-grpc-handbook)
 - [ ] [The Next.js 15 Streaming Handbook — SSR, React Suspense, and Loading Skeleton](https://www.freecodecamp.org/news/the-nextjs-15-streaming-handbook)
 - [ ] [How Attackers Steal Data from Websites](https://www.freecodecamp.org/news/how-attackers-steal-data-from-websites-and-how-to-stop-them)
-- [ ] [How to Improve Your Phone’s Privacy](https://www.freecodecamp.org/news/how-to-improve-your-phones-privacy)
+- [x] [How to Improve Your Phone’s Privacy](https://www.freecodecamp.org/news/how-to-improve-your-phones-privacy)
 - [ ] [LeetCode Meditations: A Visual Handbook of Data Structures and Algorithms Concepts](https://www.freecodecamp.org/news/leetcode-dsa-concepts-handbook)
 - [ ] [How Attackers Target Travelers – and How to Defend Yourself](https://www.freecodecamp.org/news/how-attackers-target-travelers-and-how-to-defend-yourself)
 - [ ] [Master REST API Development with .NET 9](https://www.freecodecamp.org/news/master-rest-api-development-with-net-9)
