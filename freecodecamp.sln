@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "create-a-minimal-api-in-net-core-handbook", "create-a-minimal-api-in-net-core-handbook", "{1613D775-3778-3393-E58E-86C28815EB61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookStoreApi", "create-a-minimal-api-in-net-core-handbook\BookStoreApi\BookStoreApi.csproj", "{5B8B8C76-B72B-7CFC-1FC2-5A16AFFF4EAF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B8B8C76-B72B-7CFC-1FC2-5A16AFFF4EAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B8B8C76-B72B-7CFC-1FC2-5A16AFFF4EAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B8B8C76-B72B-7CFC-1FC2-5A16AFFF4EAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B8B8C76-B72B-7CFC-1FC2-5A16AFFF4EAF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5B8B8C76-B72B-7CFC-1FC2-5A16AFFF4EAF} = {1613D775-3778-3393-E58E-86C28815EB61}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2450E28C-D2E0-43F7-9454-6936A6E006DB}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,64 @@
+# ================================
+# Build results
+# ================================
+bin/
+obj/
+
+# ================================
+# Visual Studio / Rider / VS Code
+# ================================
+.vs/
+.vscode/
+.idea/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ================================
+# Logs
+# ================================
+*.log
+
+# ================================
+# OS generated files
+# ================================
+.DS_Store
+Thumbs.db
+
+# ================================
+# NuGet
+# ================================
+*.nupkg
+*.snupkg
+project.assets.json
+project.nuget.cache
+
+# ================================
+# Publish output
+# ================================
+**/publish/
+**/Publish/
+
+# ================================
+# Secrets (if you use later)
+# ================================
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Uncomment if you add secrets file later
+# secrets.json
+
+# ================================
+# Test results
+# ================================
+TestResults/
+
+# ================================
+# Backup files
+# ================================
+*.bak
+*.tmp
+*.swp

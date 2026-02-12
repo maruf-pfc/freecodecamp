@@ -23,3 +23,4 @@ My notes on [https://www.freecodecamp.org/news](https://www.freecodecamp.org/new
 - [ ] [The Software Architecture Handbook](https://www.freecodecamp.org/news/an-introduction-to-software-architecture-patterns)
 - [ ] [The REST API Handbook – How to Build, Test, Consume, and Document REST APIs](https://www.freecodecamp.org/news/build-consume-and-document-a-rest-api)
 - [ ] [How to Test Your Apps using Jest, Testing Library, Cypress, and Supertest](https://www.freecodecamp.org/news/test-a-react-app-with-jest-testing-library-and-cypress)
+- [ ] [How to Create a Minimal API in .NET Core – A Step By Step Handbook](https://www.freecodecamp.org/news/create-a-minimal-api-in-net-core-handbook)
